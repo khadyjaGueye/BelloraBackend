@@ -1,0 +1,42 @@
+src
+├── config
+│   ├── database.js
+│   └── jwt.js
+│
+├── controllers
+│   ├── auth.controller.js      ← nouveau
+│   ├── user.controller.js      ← nouveau
+│   ├── product.controller.js
+│   ├── category.controller.js
+│   └── order.controller.js
+│
+├── middlewares
+│   ├── auth.middleware.js      ← vérifie le JWT
+│   ├── role.middleware.js      ← vérifie admin/client
+│   └── upload.middleware.js
+│
+├── models
+│   ├── User.js                 ← nouveau
+│   ├── Product.js
+│   ├── Category.js
+│   └── Order.js
+│
+├── routes
+│   ├── auth.route.js           ← nouveau
+│   ├── user.route.js           ← nouveau
+│   ├── product.route.js
+│   ├── category.route.js
+│   └── order.route.js
+│
+├── services
+│   ├── auth.service.js         ← nouveau
+│   ├── user.service.js         ← nouveau
+│   ├── product.service.js
+│   ├── category.service.js
+│   └── order.service.js
+│
+├── utils
+│   ├── generateToken.js
+│   └── response.js
+│
+└── app.js

@@ -10,6 +10,7 @@ const testRoute = require('./routes/test.route');
 const categoryRoute = require('./routes/category.route');
 const productRoute = require('./routes/product.route');
 const orderRoute = require('./routes/order.route');
+const authRoute = require("./routes/auth.route");
 
 const path = require('path');
 
@@ -30,5 +31,7 @@ app.use(
 );
 
 app.use('/api/orders', orderRoute);
+
+app.use("/api/auth", authRoute);
 
 module.exports = app;
