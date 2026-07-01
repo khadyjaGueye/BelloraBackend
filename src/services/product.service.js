@@ -2,27 +2,45 @@ const pool = require('../config/database');
 
 async function findAll() {
     const [rows] = await pool.query(`
-        SELECT
-            p.*,
-            c.name as category_name
-        FROM products p
-        INNER JOIN categories c
-            ON c.id = p.category_id
-    `);
+    SELECT
+      p.id,
+      p.name,
+      p.description,
+      p.price,
+      p.stock,
+      p.image,
+      p.category_id,
+      c.name AS category_name
+    FROM products p
+    INNER JOIN categories c
+      ON c.id = p.category_id
+    ORDER BY p.created_at DESC
+  `);
     return rows;
 }
 
+
 async function findById(id) {
-    const [rows] = await pool.query(
-        `
-        SELECT *
-        FROM products
-        WHERE id = ?
-        `,
-        [id]
-    );
-    return rows[0];
+  const [rows] = await pool.query(
+    `
+    SELECT 
+      p.id,
+      p.name,
+      p.description,
+      p.price,
+      p.stock,
+      p.image,
+      p.category_id,
+      c.name AS category_name
+    FROM products p
+    INNER JOIN categories c ON c.id = p.category_id
+    WHERE p.id = ?
+    `,
+    [id]
+  );
+  return rows[0];
 }
+
 
 async function create(product) {
     const [result] = await pool.query(
