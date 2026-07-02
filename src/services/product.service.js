@@ -41,7 +41,6 @@ async function findById(id) {
   return rows[0];
 }
 
-
 async function create(product) {
     const [result] = await pool.query(
         `
