@@ -1,12 +1,12 @@
-const express = require('express');
-
+const express = require("express");
 const router = express.Router();
 
-router.get('/', (req, res) => {
-    res.json({
-        success: true,
-        message: 'Route test Bellora'
-    });
-});
+const {
+  createTest,
+  getTests,
+} = require("../controllers/test.controller");
 
-module.exports = router;    
+router.post("/", createTest);
+router.get("/", getTests);
+
+module.exports = router;
