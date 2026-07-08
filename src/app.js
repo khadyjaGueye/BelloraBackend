@@ -37,13 +37,6 @@ app.use("/api/auth", authRoute);
 
 app.use("/api/users", userRoutes);
 
-app.get("/", (req, res) => {
-    res.json({
-      success: true,
-      message: "API OK"
-    });
-  });
-
   const prisma = require("./config/prisma");
 
 app.get("/api/debug", async (req, res) => {
