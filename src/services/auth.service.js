@@ -1,229 +1,104 @@
-const pool = require("../config/database");
-const bcrypt = require("bcrypt");
-const jwt = require("jsonwebtoken");
-const jwtConfig = require("../config/jwt");
+const prisma = require('../config/prisma');
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
+const jwtConfig = require('../config/jwt');
 
 class AuthService {
+  async register(data) {
+    const { firstName, lastName, email, password, phone } = data;
 
-    /**
-     * Inscription
-     */
-    async register(data) {
-        const { firstName, lastName, email, password, phone } = data;
-        // Vérifier si l'email existe déjà
-        const [existingEmail] = await pool.query(
-            "SELECT id FROM users WHERE email = ?",
-            [email]
-        );
-        if (existingEmail.length > 0) {
-            throw new Error("Cet email est déjà utilisé.");
-        }
-        // Vérifier si le numéro existe déjà
-        const [existingPhone] = await pool.query(
-            "SELECT id FROM users WHERE phone = ?",
-            [phone]
-        );
-        if (existingPhone.length > 0) {
-            throw new Error("Ce numéro de téléphone est déjà utilisé.");
-        }
+    // Vérifier si l'email existe déjà
+    const existingEmail = await prisma.user.findUnique({ where: { email } });
+    if (existingEmail) throw new Error("Cet email est déjà utilisé.");
 
-        // Hash du mot de passe
-        const hashedPassword = await bcrypt.hash(password, 10);
-
-        // Insertion
-        const [result] = await pool.query(
-            `
-    INSERT INTO users
-    ( first_name, last_name, email, password, phone )
-    VALUES (?,?,?,?,?)
-    `,
-            [
-                firstName,
-                lastName,
-                email,
-                hashedPassword,
-                phone || null
-            ]
-        );
-
-        // Génération du token
-        const token = jwt.sign(
-            {
-                id: result.insertId,
-                role: "customer"
-            },
-            jwtConfig.secret,
-            {
-                expiresIn: jwtConfig.expiresIn
-            }
-        );
-
-        return {
-            success: true,
-            message: "Compte créé avec succès.",
-            token,
-            user: {
-                id: result.insertId,
-                firstName,
-                lastName,
-                email,
-                phone,
-                role: "customer"
-            }
-        };
+    // Vérifier si le numéro existe déjà
+    if (phone) {
+      const existingPhone = await prisma.user.findFirst({ where: { phone } });
+      if (existingPhone) throw new Error("Ce numéro de téléphone est déjà utilisé.");
     }
 
+    // Hash du mot de passe
+    const hashedPassword = await bcrypt.hash(password, 10);
 
-    /**
-     * Connexion
-     */
-    async login(email, password) {
+    // Création utilisateur
+    const user = await prisma.user.create({
+      data: {
+        first_name: firstName,
+        last_name: lastName,
+        email,
+        password: hashedPassword,
+        phone,
+        role: "customer",
+      },
+    });
 
-        const [rows] = await pool.query(
-            "SELECT * FROM users WHERE email = ?",
-            [email]
-        );
+    // Génération du token
+    const token = jwt.sign(
+      { id: user.id, role: user.role },
+      jwtConfig.secret,
+      { expiresIn: jwtConfig.expiresIn }
+    );
 
-        if (rows.length === 0) {
-            throw new Error("Email ou mot de passe incorrect.");
-        }
+    return { success: true, message: "Compte créé avec succès.", token, user };
+  }
 
-        const user = rows[0];
+  async login(email, password) {
+    const user = await prisma.user.findUnique({ where: { email } });
+    if (!user) throw new Error("Email ou mot de passe incorrect.");
+    if (!user.is_active) throw new Error("Votre compte est désactivé.");
 
-        if (!user.is_active) {
-            throw new Error("Votre compte est désactivé.");
-        }
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) throw new Error("Email ou mot de passe incorrect.");
 
-        const isMatch = await bcrypt.compare(
-            password,
-            user.password
-        );
+    const token = jwt.sign(
+      { id: user.id, role: user.role },
+      jwtConfig.secret,
+      { expiresIn: jwtConfig.expiresIn }
+    );
 
-        if (!isMatch) {
-            throw new Error("Email ou mot de passe incorrect.");
-        }
+    const { password: _, ...safeUser } = user;
+    return { success: true, message: "Connexion réussie.", token, user: safeUser };
+  }
 
-        const token = jwt.sign(
-            {
-                id: user.id,
-                role: user.role
-            },
-            jwtConfig.secret,
-            {
-                expiresIn: jwtConfig.expiresIn
-            }
-        );
+  async profile(id) {
+    const user = await prisma.user.findUnique({
+      where: { id },
+      select: {
+        id: true,
+        first_name: true,
+        last_name: true,
+        email: true,
+        phone: true,
+        role: true,
+        is_active: true,
+        created_at: true,
+        updated_at: true,
+      },
+    });
+    if (!user) throw new Error("Utilisateur introuvable.");
+    return user;
+  }
 
-        delete user.password;
+  async updateProfile(id, data) {
+    const user = await prisma.user.update({
+      where: { id },
+      data,
+    });
+    return user;
+  }
 
-        return {
-            success: true,
-            message: "Connexion réussie.",
-            token,
-            user
-        };
-    }
+  async changePassword(id, oldPassword, newPassword) {
+    const user = await prisma.user.findUnique({ where: { id } });
+    if (!user) throw new Error("Utilisateur introuvable.");
 
-    /**
-     * Profil connecté
-     */
-    async profile(id) {
+    const isMatch = await bcrypt.compare(oldPassword, user.password);
+    if (!isMatch) throw new Error("Ancien mot de passe incorrect.");
 
-        const [rows] = await pool.query(
-            `
-            SELECT
-                id,
-                first_name,
-                last_name,
-                email,
-                phone,
-                role,
-                is_active,
-                created_at
-            FROM users
-            WHERE id = ?
-            `,
-            [id]
-        );
+    const hash = await bcrypt.hash(newPassword, 10);
+    await prisma.user.update({ where: { id }, data: { password: hash } });
 
-        if (rows.length === 0) {
-            throw new Error("Utilisateur introuvable.");
-        }
-
-        return rows[0];
-    }
-
-    /**
-     * Modifier le profil
-     */
-    async updateProfile(id, data) {
-
-        const {
-            firstName,
-            lastName,
-            phone
-        } = data;
-
-        await pool.query(
-            `
-            UPDATE users
-            SET
-                first_name = ?,
-                last_name = ?,
-                phone = ?
-            WHERE id = ?
-            `,
-            [
-                firstName,
-                lastName,
-                phone,
-                id
-            ]
-        );
-
-        return this.profile(id);
-    }
-
-    /**
-     * Modifier le mot de passe
-     */
-    async changePassword(id, oldPassword, newPassword) {
-
-        const [rows] = await pool.query(
-            "SELECT password FROM users WHERE id=?",
-            [id]
-        );
-
-        if (rows.length === 0) {
-            throw new Error("Utilisateur introuvable.");
-        }
-
-        const isMatch = await bcrypt.compare(
-            oldPassword,
-            rows[0].password
-        );
-
-        if (!isMatch) {
-            throw new Error("Ancien mot de passe incorrect.");
-        }
-
-        const hash = await bcrypt.hash(newPassword, 10);
-
-        await pool.query(
-            `
-            UPDATE users
-            SET password = ?
-            WHERE id = ?
-            `,
-            [hash, id]
-        );
-
-        return {
-            success: true,
-            message: "Mot de passe modifié avec succès."
-        };
-    }
-
+    return { success: true, message: "Mot de passe modifié avec succès." };
+  }
 }
 
 module.exports = new AuthService();
