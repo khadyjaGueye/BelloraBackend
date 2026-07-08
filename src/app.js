@@ -37,4 +37,27 @@ app.use("/api/auth", authRoute);
 
 app.use("/api/users", userRoutes);
 
+app.get("/", (req, res) => {
+    res.json({
+      success: true,
+      message: "API OK"
+    });
+  });
+
+  const prisma = require("./config/prisma");
+
+app.get("/api/debug", async (req, res) => {
+  try {
+    res.json({
+      prismaKeys: Object.keys(prisma),
+      hasUser: !!prisma.user,
+      databaseUrl: !!process.env.DATABASE_URL
+    });
+  } catch (e) {
+    res.status(500).json({
+      error: e.message
+    });
+  }
+});
+
 module.exports = app;
