@@ -1,19 +1,24 @@
-const { getTests, createTest } = require('../services/test.service');
+const prisma = require("../config/prisma");
 
-exports.getAllTests = async (req, res) => {
+async function getTests(req, res) {
   try {
-    const tests = await getTests();
+    const tests = await prisma.test.findMany();
     res.json(tests);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
-};
+}
 
-exports.addTest = async (req, res) => {
+async function createTest(req, res) {
   try {
-    const newTest = await createTest(req.body);
+    const { name, description } = req.body;
+    const newTest = await prisma.test.create({
+      data: { name, description },
+    });
     res.status(201).json(newTest);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
-};
+}
+
+module.exports = { getTests, createTest };
