@@ -4,38 +4,34 @@ const jwt = require('jsonwebtoken');
 const jwtConfig = require('../config/jwt');
 
 class AuthService {
+
     async register(data) {
-        const { first_name, last_name, email, password, phone,address } = data;
-        // Vérifier si l'email existe déjà
+        const { firstName, lastName, email, password, phone,address } = data;
+
         const existingEmail = await prisma.user.findUnique({ where: { email } });
         if (existingEmail) throw new Error("Cet email est déjà utilisé.");
-        // Vérifier si le numéro existe déjà
-        if (phone) {
-            const existingPhone = await prisma.user.findFirst({ where: { phone } });
-            if (existingPhone) throw new Error("Ce numéro de téléphone est déjà utilisé.");
-        }
-        // Hash du mot de passe
+
         const hashedPassword = await bcrypt.hash(password, 10);
-        // Création utilisateur
+
         const user = await prisma.user.create({
             data: {
-                first_name: first_name,
-                last_name: last_name,
-                email:email,
+                first_name: firstName,
+                last_name: lastName,
+                email,
                 password: hashedPassword,
+                phone,
                 address:address,
-                phone:phone,
                 role: "customer",
             },
         });
-        // Génération du token
-        const token = jwt.sign(
-            { id: user.id, role: user.role },
-            jwtConfig.secret,
-            { expiresIn: jwtConfig.expiresIn }
-        );
+
+        const token = jwt.sign({ id: user.id, role: user.role }, jwtConfig.secret, {
+            expiresIn: jwtConfig.expiresIn,
+        });
+
         return { success: true, message: "Compte créé avec succès.", token, user };
     }
+
 
     async login(email, password) {
         const user = await prisma.user.findUnique({ where: { email } });
