@@ -1,4 +1,17 @@
 const categoryService = require('../services/category.service');
+const { createClient } = require("@supabase/supabase-js");
+const prisma = require("../config/prisma");
+const ws = require("ws");
+const supabase = createClient(
+    process.env.SUPABASE_URL,
+    process.env.SUPABASE_KEY,
+    {
+        realtime: {
+            transport: ws,
+        },
+    }
+);
+
 
 async function getAll(req, res) {
     try {
@@ -49,21 +62,6 @@ async function getById(req, res) {
         });
     }
 }
-const { createClient } = require("@supabase/supabase-js");
-const prisma = require("../config/prisma");
-
-const ws = require("ws");
-const { createClient } = require("@supabase/supabase-js");
-
-const supabase = createClient(
-    process.env.SUPABASE_URL,
-    process.env.SUPABASE_KEY,
-    {
-        realtime: {
-            transport: ws,
-        },
-    }
-);
 
 exports.create = async (req, res) => {
     try {
