@@ -52,42 +52,53 @@ async function getById(req, res) {
 const { createClient } = require("@supabase/supabase-js");
 const prisma = require("../config/prisma");
 
-const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY);
+const ws = require("ws");
+const { createClient } = require("@supabase/supabase-js");
+
+const supabase = createClient(
+    process.env.SUPABASE_URL,
+    process.env.SUPABASE_KEY,
+    {
+        realtime: {
+            transport: ws,
+        },
+    }
+);
 
 exports.create = async (req, res) => {
-  try {
-    const { name, description } = req.body;
-    let imageUrl = null;
+    try {
+        const { name, description } = req.body;
+        let imageUrl = null;
 
-    if (req.file) {
-      // Upload vers Supabase Storage
-      const fileName = `categories/${Date.now()}-${req.file.originalname}`;
-      const { data, error } = await supabase.storage
-        .from("categories") // ton bucket Supabase
-        .upload(fileName, req.file.buffer, {
-          contentType: req.file.mimetype,
+        if (req.file) {
+            // Upload vers Supabase Storage
+            const fileName = `categories/${Date.now()}-${req.file.originalname}`;
+            const { data, error } = await supabase.storage
+                .from("categories") // ton bucket Supabase
+                .upload(fileName, req.file.buffer, {
+                    contentType: req.file.mimetype,
+                });
+
+            if (error) throw error;
+
+            // Récupérer l’URL publique
+            const { publicURL } = supabase.storage.from("categories").getPublicUrl(data.path);
+            imageUrl = publicURL;
+        }
+
+        // Enregistrer en base via Prisma
+        const category = await prisma.category.create({
+            data: {
+                name,
+                description,
+                image: imageUrl,
+            },
         });
 
-      if (error) throw error;
-
-      // Récupérer l’URL publique
-      const { publicURL } = supabase.storage.from("categories").getPublicUrl(data.path);
-      imageUrl = publicURL;
+        res.json({ success: true, category });
+    } catch (err) {
+        res.status(500).json({ success: false, message: err.message });
     }
-
-    // Enregistrer en base via Prisma
-    const category = await prisma.category.create({
-      data: {
-        name,
-        description,
-        image: imageUrl,
-      },
-    });
-
-    res.json({ success: true, category });
-  } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
-  }
 };
 
 
