@@ -82,7 +82,7 @@ async function create(req, res) {
                 price: req.body.price,
                 stock: req.body.stock,
                 category_id: req.body.category_id,
-                image: req.body.image
+                image
             });
         res.status(201).json({
             data: {
@@ -128,7 +128,7 @@ async function update(req, res) {
                     price: req.body.price,
                     stock: req.body.stock,
                     categoryId: req.body.category_id,
-                    image: rep.body.image
+                    image
                 }
             );
         res.json({
