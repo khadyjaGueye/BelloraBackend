@@ -13,7 +13,7 @@ router.get('/:id', productController.getById);
 router.post('/', authMiddleware, roleMiddleware('admin'), upload.single('image'), productController.create);
 
 // Upload d’une image seule
-router.post('/upload', authMiddleware, roleMiddleware('admin'), upload.single('image'), productController.uploadImage);
+// router.post('/upload', authMiddleware, roleMiddleware('admin'), upload.single('image'), productController.uploadImage);
 
 // Mise à jour d’un produit
 router.put('/:id', authMiddleware, roleMiddleware('admin'), upload.single('image'), productController.update);
