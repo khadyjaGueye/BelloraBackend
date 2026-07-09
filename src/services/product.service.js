@@ -39,9 +39,9 @@ async function create(product) {
       price: Number(product.price),
       stock: Number(product.stock),
       image: product.image,
-      category: {
+      category_id: {
         connect: {
-          id: Number(product.categoryId)
+          id: Number(product.category_id)
         }
       }
     }
@@ -59,9 +59,9 @@ async function update(id, product) {
       price: Number(product.price),
       stock: Number(product.stock),
       image: product.image,
-      category: {
+      category_id: {
         connect: {
-          id: Number(product.categoryId)
+          id: Number(product.category_id)
         }
       }
     }
