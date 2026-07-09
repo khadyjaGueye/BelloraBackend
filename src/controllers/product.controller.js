@@ -70,25 +70,32 @@ async function getById(req, res) {
 
 async function create(req, res) {
     try {
+        console.log(req.body);
         let image = null;
         if (req.file) {
-            image =
-                await uploadProductImage(req.file);
+            image = await uploadProductImage(req.file);
         }
-        const product =
-            await productService.create({
-                name: req.body.name,
-                description: req.body.description,
-                price: req.body.price,
-                stock: req.body.stock,
-                category_id: req.body.category_id,
-                image
+        if (!req.body.price || !req.body.category_id) {
+            return res.status(400).json({
+                data: {
+                    success: false,
+                    message: "price et category_id sont obligatoires"
+                }
             });
+        }
+        const product = await productService.create({
+            name: req.body.name,
+            description: req.body.description,
+            price: req.body.price,
+            stock: req.body.stock,
+            category_id: req.body.category_id,
+            image
+        });
         res.status(201).json({
             data: {
                 success: true,
                 message: "Produit enregistré avec succès",
-                product: product
+                product
             }
         });
     } catch (error) {

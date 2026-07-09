@@ -38,14 +38,15 @@ async function create(product) {
       description: product.description,
       price: Number(product.price),
       stock: Number(product.stock),
-      image: product.image,
-      category_id: {
+      image: product.image || null,
+      category: {
         connect: {
           id: Number(product.category_id)
         }
       }
     }
   });
+
 }
 
 async function update(id, product) {
