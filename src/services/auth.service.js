@@ -6,7 +6,7 @@ const jwtConfig = require('../config/jwt');
 class AuthService {
 
     async register(data) {
-        const { firstName, lastName, email, password, phone,address,image } = data;
+        const { last_name, first_name, email, password, phone,address,image } = data;
 
         const existingEmail = await prisma.user.findUnique({ where: { email } });
         if (existingEmail) throw new Error("Cet email est déjà utilisé.");
@@ -15,8 +15,8 @@ class AuthService {
 
         const user = await prisma.user.create({
             data: {
-                first_name: firstName,
-                last_name: lastName,
+                first_name: first_name,
+                last_name: last_name,
                 email,
                 password: hashedPassword,
                 phone,

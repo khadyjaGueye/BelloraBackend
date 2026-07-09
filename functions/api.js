@@ -1,5 +1,5 @@
 const serverless = require("serverless-http");
-const app = require("../src/app"); // importe ton app.js
+const app = require("../src/app"); 
 
 module.exports.handler = serverless(app);
 
