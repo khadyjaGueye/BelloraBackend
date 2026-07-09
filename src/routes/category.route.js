@@ -8,7 +8,7 @@ const roleMiddleware = require('../middlewares/role.middleware');
 module.exports = router;
 
 router.get('/', categoryController.getAll);
-router.post("/", authMiddleware, roleMiddleware("admin"), upload.single("image"), productController.create);
+router.post("/", authMiddleware, roleMiddleware("admin"), upload.single("image"), categoryController.create);
 router.get('/:id', categoryController.getById);
 router.put('/:id', categoryController.update);
 router.delete('/:id', categoryController.remove);
