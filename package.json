@@ -9,6 +9,9 @@
     "build": "npx prisma generate",
     "postinstall": "prisma generate"
   },
+  "engines": {
+    "node": "20.x"
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",
