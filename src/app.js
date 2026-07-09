@@ -17,7 +17,7 @@ const path = require('path');
 
 app.use('/api/test', testRoute);
 
-// app.use('/api/categories', categoryRoute);
+app.use('/api/categories', categoryRoute);
 
 app.use('/api/products', productRoute);
 
