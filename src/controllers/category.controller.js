@@ -2,15 +2,7 @@ const categoryService = require('../services/category.service');
 const { createClient } = require("@supabase/supabase-js");
 const prisma = require("../config/prisma");
 const ws = require("ws");
-const supabase = createClient(
-    process.env.SUPABASE_URL,
-    process.env.SUPABASE_KEY,
-    {
-        realtime: {
-            transport: ws,
-        },
-    }
-);
+const supabase = require("../config/supabase");
 
 
 async function getAll(req, res) {
