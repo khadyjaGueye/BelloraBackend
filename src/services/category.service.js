@@ -1,70 +1,51 @@
-const pool = require('../config/database');
+const prisma = require("../config/prisma");
 
+// Récupérer toutes les catégories
 async function findAll() {
-    const [rows] = await pool.query(
-        'SELECT * FROM categories'
-    );
-    return rows;
+  return await prisma.category.findMany();
 }
 
+// Récupérer une catégorie par ID
 async function findById(id) {
-    const [rows] = await pool.query(
-        'SELECT * FROM categories WHERE id = ?',
-        [id]
-    );
-    return rows[0];
+  return await prisma.category.findUnique({
+    where: { id: Number(id) },
+  });
 }
 
+// Créer une nouvelle catégorie
 async function create(category) {
-    const [result] = await pool.query(
-        `
-        INSERT INTO categories
-        (name,description,image )
-        VALUES
-        (?,?,?)
-        `,
-        [
-            category.name,
-            category.description,
-            category.image
-        ]
-    );
-    return result;
+  return await prisma.category.create({
+    data: {
+      name: category.name,
+      description: category.description,
+      image: category.image,
+    },
+  });
 }
 
+// Mettre à jour une catégorie
 async function update(id, category) {
-
-    const [result] = await pool.query(
-        `
-        UPDATE categories
-        SET
-            name = ?,
-            description = ?,
-             image = ?
-        WHERE id = ?
-        `,
-        [
-            category.name,
-            category.description,
-            category.image,
-            id
-        ]
-    );
-    return result;
+  return await prisma.category.update({
+    where: { id: Number(id) },
+    data: {
+      name: category.name,
+      description: category.description,
+      image: category.image,
+    },
+  });
 }
 
+// Supprimer une catégorie
 async function remove(id) {
-    const [result] = await pool.query(
-        'DELETE FROM categories WHERE id = ?',
-        [id]
-    );
-    return result;
+  return await prisma.category.delete({
+    where: { id: Number(id) },
+  });
 }
 
 module.exports = {
-    findAll,
-    findById,
-    create,
-    update,
-    remove
+  findAll,
+  findById,
+  create,
+  update,
+  remove,
 };
