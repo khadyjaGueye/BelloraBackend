@@ -1,4 +1,5 @@
 const categoryService = require('../services/category.service');
+const supabase = require("../config/supabase");
 
 async function getAll(req, res) {
     try {
@@ -52,36 +53,96 @@ async function getById(req, res) {
 
 async function create(req, res) {
     try {
-        const { name, description, image } = req.body;
+        const { name, description } = req.body;
         if (!name) {
             return res.status(400).json({
                 success: false,
-                message: 'Le nom est obligatoire'
+                message: "Le nom est obligatoire"
             });
         }
-        const result =
-            await categoryService.create({
-                name,
-                description,
-                image
-            });
+        let image = null;
+        if (req.file) {
+            const fileName =
+                `categories/${Date.now()}-${req.file.originalname}`;
+            const { data, error } =
+                await supabase.storage
+                    .from("categories")
+                    .upload(
+                        fileName,
+                        req.file.buffer,
+                        {
+                            contentType: req.file.mimetype
+                        }
+                    );
+
+            if (error) {
+                return res.status(500).json({
+                    success: false,
+                    message: error.message
+                });
+            }
+            const {
+                data: { publicUrl }
+            } = supabase.storage
+                .from("categories")
+                .getPublicUrl(data.path);
+            image = publicUrl;
+        }
+        const result = await categoryService.create({
+            name,
+            description,
+            image
+        });
         res.status(201).json({
             data: {
                 success: true,
-                message: 'Catégorie créée avec succès',
+                message: "Catégorie créée avec succès",
                 id: result.insertId
             }
         });
 
     } catch (error) {
         res.status(500).json({
-            data: {
-                success: false,
-                message: error.message
-            }
+            success: false,
+            message: error.message
         });
+
     }
+
 }
+
+// async function create(req, res) {
+//     try {
+//         const { name, description, image } = req.body;
+//         if (!name) {
+//             return res.status(400).json({
+//                 success: false,
+//                 message: 'Le nom est obligatoire'
+//             });
+//         }
+//         const result =
+//             await categoryService.create({
+//                 name,
+//                 description,
+//                 image
+//             });
+//         res.status(201).json({
+//             data: {
+//                 success: true,
+//                 message: 'Catégorie créée avec succès',
+//                 id: result.insertId
+//             }
+//         });
+
+//     } catch (error) {
+//         res.status(500).json({
+//             data: {
+//                 success: false,
+//                 message: error.message
+//             }
+//         });
+//     }
+// }
 
 async function update(req, res) {
     try {
