@@ -9,11 +9,11 @@ const roleMiddleware = require('../middlewares/role.middleware');
 const optionalAuth = require('../middlewares/optionalAuth.middleware');
 
 router.post('/', optionalAuth, orderController.store);
-// router.post('/', orderController.store);
 
 // Récupérer toutes les commandes (admin uniquement)
 router.get('/', authMiddleware, roleMiddleware('admin'), orderController.getAll);
-
+//Récupérer une commande par ID (admin uniquement)
+router.get('/:id', authMiddleware, roleMiddleware('admin'), orderController.getOne);
 // Mettre à jour le statut d’une commande (admin uniquement)
 router.put('/:id/', authMiddleware, roleMiddleware('admin'), orderController.updateStatus);
 

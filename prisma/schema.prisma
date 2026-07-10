@@ -25,6 +25,7 @@ model User {
   image       String?
   password    String
   is_active   Boolean  @default(true)
+  orders     Order[]
   created_at  DateTime @default(now())
   updated_at  DateTime @updatedAt
 }
@@ -49,6 +50,7 @@ model Product {
   image       String?
   category_id  Int
   category    Category @relation(fields: [category_id], references: [id])
+  orderItems  OrderItem[]
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }
@@ -58,4 +60,27 @@ model CodeErreur {
   code        String   @unique
   signification String
   message     String
+}
+
+model Order {
+  id              Int          @id @default(autoincrement())
+  customer_name   String
+  customer_phone  String
+  customer_address String
+  total_amount    Int
+  status          String       @default("en_attente")
+  created_at      DateTime     @default(now())
+  user_id         Int?
+  user            User?        @relation(fields: [user_id], references: [id])
+  items           OrderItem[]
+}
+
+model OrderItem {
+  id        Int     @id @default(autoincrement())
+  order_id  Int
+  product_id Int
+  quantity  Int
+  price     Int
+  order     Order   @relation(fields: [order_id], references: [id])
+  product   Product @relation(fields: [product_id], references: [id])
 }

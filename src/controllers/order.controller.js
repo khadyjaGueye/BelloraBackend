@@ -66,6 +66,27 @@ async function getAll(req, res) {
     }
 }
 
+async function getOne(req, res) {
+  try {
+    const { id } = req.params;
+    const order = await orderService.getOrderById(id);
+
+    if (!order) {
+      return res.status(404).json({
+        data: { success: false, message: 'Commande introuvable' }
+      });
+    }
+
+    return res.json({
+      data: { success: true, order }
+    });
+  } catch (error) {
+    return res.status(500).json({
+      data: { success: false, message: error.message }
+    });
+  }
+}
+
 async function updateStatus(req, res) {
     try {
         const { id } = req.params;
@@ -96,6 +117,7 @@ async function updateStatus(req, res) {
 
 module.exports = {
     getAll,
+    getOne,
     updateStatus,
     store
 };

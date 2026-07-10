@@ -1,145 +1,135 @@
-const pool = require('../config/database');
+const { PrismaClient } = require('@prisma/client');
+const prisma = new PrismaClient();
 
-// Création d'une commande (déjà fait)
-async function createOrder(order) {
-    const [result] = await pool.query(
-        `
-    INSERT INTO orders
-    (
-      customer_name,
-      customer_phone,
-      customer_address,
-      total_amount,
-      user_id
-    )
-    VALUES (?, ?, ?, ?, ?)
-    `,
-        [
-            order.customer_name,
-            order.customer_phone,
-            order.customer_address,
-            order.total_amount,
-            order.user_id
-        ]
-    );
-
-    return result.insertId;
-}
-
-// Création des items (déjà fait)
-async function createOrderItems(orderId, items) {
-    for (const item of items) {
-        await pool.query(
-            `
-      INSERT INTO order_items
-      (
-        order_id,
-        product_id,
-        quantity,
-        price
-      )
-      VALUES (?, ?, ?, ?)
-      `,
-            [orderId, item.product_id, item.quantity, item.price]
-        );
-    }
-}
-
-//  Récupérer toutes les commandes avec détails
-async function getAllOrders() {
-    const [rows] = await pool.query(
-        `
-    SELECT 
-      o.id AS order_id,
-      o.customer_name,
-      o.customer_phone,
-      o.customer_address,
-      o.total_amount,
-      o.status,
-      o.created_at,
-      u.first_name AS user_name,
-      u.email AS user_email,
-      oi.product_id,
-      p.name AS product_name,
-      oi.quantity,
-      oi.price
-    FROM orders o
-    LEFT JOIN users u ON o.user_id = u.id
-    LEFT JOIN order_items oi ON o.id = oi.order_id
-    LEFT JOIN products p ON oi.product_id = p.id
-    ORDER BY o.created_at DESC
-    `
-    );
-
-    // Regrouper les items par commande
-    const ordersMap = {};
-    rows.forEach(row => {
-        if (!ordersMap[row.order_id]) {
-            ordersMap[row.order_id] = {
-                id: row.order_id,
-                customer_name: row.customer_name,
-                customer_phone: row.customer_phone,
-                customer_address: row.customer_address,
-                total_amount: row.total_amount,
-                status: row.status,
-                created_at: row.created_at,
-                user: row.user_name ? { name: row.user_name, email: row.user_email } : null,
-                items: []
-            };
-        }
-        if (row.product_id) {
-            ordersMap[row.order_id].items.push({
-                product_id: row.product_id,
-                product_name: row.product_name,
-                quantity: row.quantity,
-                price: row.price
-            });
+async function getOrderById(orderId) {
+    const order = await prisma.order.findUnique({
+        where: { id: Number(orderId) },
+        include: {
+            user: { select: { first_name: true, email: true } },
+            items: {
+                include: {
+                    product: { select: { name: true } }
+                }
+            }
         }
     });
 
-    return Object.values(ordersMap);
+    if (!order) return null;
+
+    return {
+        id: order.id,
+        customer_name: order.customer_name,
+        customer_phone: order.customer_phone,
+        customer_address: order.customer_address,
+        total_amount: order.total_amount,
+        status: order.status,
+        created_at: order.created_at,
+        user: order.user ? { name: order.user.first_name, email: order.user.email } : null,
+        items: order.items.map(i => ({
+            product_id: i.product_id,
+            product_name: i.product.name,
+            quantity: i.quantity,
+            price: i.price
+        }))
+    };
 }
 
-//Mettre à jour le statut d’une commande
+// Créer une commande
+async function createOrder(order) {
+    const newOrder = await prisma.order.create({
+        data: {
+            customer_name: order.customer_name,
+            customer_phone: order.customer_phone,
+            customer_address: order.customer_address,
+            total_amount: order.total_amount,
+            user_id: order.user_id || null,
+        }
+    });
+    return newOrder.id;
+}
+
+// Créer les items
+async function createOrderItems(orderId, items) {
+    await prisma.orderItem.createMany({
+        data: items.map(item => ({
+            order_id: orderId,
+            product_id: item.product_id,
+            quantity: item.quantity,
+            price: item.price
+        }))
+    });
+}
+
+// Récupérer toutes les commandes avec détails
+async function getAllOrders() {
+    const orders = await prisma.order.findMany({
+        include: {
+            user: { select: { first_name: true, email: true } },
+            items: {
+                include: {
+                    product: { select: { name: true } }
+                }
+            }
+        },
+        orderBy: { created_at: 'desc' }
+    });
+
+    return orders.map(o => ({
+        id: o.id,
+        customer_name: o.customer_name,
+        customer_phone: o.customer_phone,
+        customer_address: o.customer_address,
+        total_amount: o.total_amount,
+        status: o.status,
+        created_at: o.created_at,
+        user: o.user ? { name: o.user.first_name, email: o.user.email } : null,
+        items: o.items.map(i => ({
+            product_id: i.product_id,
+            product_name: i.product.name,
+            quantity: i.quantity,
+            price: i.price
+        }))
+    }));
+}
+
+// Mettre à jour le statut
 async function updateOrderStatus(orderId, status) {
-    const [result] = await pool.query(
-        `
-    UPDATE orders
-    SET status = ?
-    WHERE id = ?
-    `,
-        [status, orderId]
-    );
-    return result.affectedRows > 0;
+    const updated = await prisma.order.update({
+        where: { id: Number(orderId) },
+        data: { status }
+    });
+    return !!updated;
 }
 
+// Valider une commande
 async function validateOrder(orderId, status) {
-    // Vérifier que le statut est bien confirmee ou livree
     if (status !== 'confirmee' && status !== 'livree') {
-        throw new Error("Le statut doit être 'confirmee' ou 'livree' pour valider la commande");
+        throw new Error("Le statut doit être 'confirmee' ou 'livree'");
     }
-    // Récupérer les items de la commande
-    const [items] = await pool.query(
-        `SELECT product_id, quantity FROM order_items WHERE order_id = ?`,
-        [orderId]
-    );
-    // Diminuer le stock pour chaque produit
-    for (const item of items) {
-        await pool.query(
-            `UPDATE products SET stock = stock - ? WHERE id = ? AND stock >= ?`,
-            [item.quantity, item.product_id, item.quantity]
-        );
-    }
-    // Mettre à jour le statut de la commande
-    const [result] = await pool.query(
-        `UPDATE orders SET status = ? WHERE id = ?`,
-        [status, orderId]
-    );
-    return result.affectedRows > 0;
-}
 
+    const items = await prisma.orderItem.findMany({
+        where: { order_id: Number(orderId) }
+    });
+
+    for (const item of items) {
+        await prisma.product.update({
+            where: { id: item.product_id },
+            data: {
+                stock: { decrement: item.quantity }
+            }
+        });
+    }
+
+    const updated = await prisma.order.update({
+        where: { id: Number(orderId) },
+        data: { status }
+    });
+
+    return !!updated;
+}
 
 module.exports = {
+    getOrderById,
     createOrder,
     createOrderItems,
     getAllOrders,

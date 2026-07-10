@@ -59,7 +59,7 @@ async function update(id, product) {
       price: Number(product.price),
       stock: Number(product.stock),
       image: product.image,
-      category_id: Number(product.category_id) // <-- valeur directe
+      category_id: Number(product.category_id)
     }
   });
 }
