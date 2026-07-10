@@ -52,3 +52,10 @@ model Product {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }
+
+model CodeErreur {
+  id          Int      @id @default(autoincrement())
+  code        String   @unique
+  signification String
+  message     String
+}
