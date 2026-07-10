@@ -32,13 +32,8 @@ async function getAll(req, res) {
                 products: products
             }
         });
-    } catch (error) {
-        res.status(500).json({
-            data: {
-                success: false,
-                message: error.message
-            }
-        });
+    }  catch (error) {
+        next(error); // délègue au middleware global
     }
 }
 
@@ -58,13 +53,8 @@ async function getById(req, res) {
                 product: product,
             }
         });
-    } catch (error) {
-        res.status(500).json({
-            data: {
-                success: false,
-                message: error.message
-            }
-        });
+    }  catch (error) {
+        next(error); // délègue au middleware global
     }
 }
 
@@ -98,13 +88,8 @@ async function create(req, res) {
                 product
             }
         });
-    } catch (error) {
-        res.status(500).json({
-            data: {
-                success: false,
-                message: error.message
-            }
-        });
+    }  catch (error) {
+        next(error); // délègue au middleware global
     }
 }
 
@@ -156,13 +141,8 @@ async function remove(req, res) {
                 message: "Produit supprimé"
             }
         });
-    } catch (error) {
-        res.status(500).json({
-            data: {
-                success: false,
-                message: error.message
-            }
-        });
+    }  catch (error) {
+        next(error); // délègue au middleware global
     }
 }
 

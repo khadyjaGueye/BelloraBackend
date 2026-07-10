@@ -2,15 +2,28 @@ const userService = require('../services/user.service');
 
 exports.getCurrentUser = async (req, res) => {
   if (!req.user) {
-    return res.status(401).json({ success: false, message: "Non authentifié." });
+    return res.status(401).json({
+      data: {
+        success: false,
+        message: "Non authentifié."
+      }
+    });
   }
-
   const user = await userService.getUserById(req.user.id);
   if (!user) {
-    return res.status(404).json({ success: false, message: "Utilisateur introuvable" });
+    return res.status(404).json({
+      data: {
+        success: false,
+        message: "Utilisateur introuvable"
+      }
+    });
   }
-
-  res.json({ success: true, user });
+  res.json({
+    data: {
+      success: true,
+      user: user
+    }
+  });
 };
 
 exports.updateProfile = async (req, res) => {
@@ -28,9 +41,14 @@ exports.updateProfile = async (req, res) => {
       image,
     });
 
-    res.json({ success: true, message: 'Profil mis à jour', user: result.user });
+    res.json({
+      data: {
+        success: true, message: 'Profil mis à jour',
+        user: result.user
+      }
+    });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    next(error); // délègue au middleware global
   }
 };
 
@@ -46,6 +64,6 @@ exports.changePassword = async (req, res) => {
 
     res.json({ success: true, message: 'Mot de passe modifié avec succès' });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    next(error); // délègue au middleware global
   }
 };

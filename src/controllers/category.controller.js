@@ -13,14 +13,7 @@ async function getAll(req, res) {
         });
 
     } catch (error) {
-
-        return res.status(500).json({
-            data: {
-                status: 500,
-                categories: error.message
-            }
-        });
-
+        next(error); // délègue au middleware global
     }
 }
 
@@ -45,9 +38,7 @@ async function getById(req, res) {
         });
 
     } catch (error) {
-        res.status(500).json({
-            message: error.message
-        });
+        next(error); // délègue au middleware global
     }
 }
 
@@ -102,13 +93,8 @@ async function create(req, res) {
         });
 
     } catch (error) {
-        res.status(500).json({
-            success: false,
-            message: error.message
-        });
-
+        next(error); // délègue au middleware global
     }
-
 }
 
 // async function create(req, res) {
@@ -177,12 +163,7 @@ async function update(req, res) {
             }
         });
     } catch (error) {
-        return res.status(500).json({
-            data: {
-                success: false,
-                message: error.message
-            }
-        });
+        next(error); // délègue au middleware global
     }
 }
 
@@ -210,12 +191,7 @@ async function remove(req, res) {
             }
         });
     } catch (error) {
-        return res.status(500).json({
-            data: {
-                success: false,
-                message: error.message
-            }
-        });
+        next(error); // délègue au middleware global
     }
 }
 
