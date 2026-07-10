@@ -36,7 +36,7 @@ const codes = [
 ];
 
 async function main() {
-  console.log("🌱 Seeding table CodeErreur...");
+  console.log("Seeding table CodeErreur...");
   for (const c of codes) {
     await prisma.codeErreur.upsert({
       where: { code: c.code },
@@ -44,7 +44,7 @@ async function main() {
       create: c,
     });
   }
-  console.log("✅ Seed terminé !");
+  console.log("Seed terminé !");
 }
 
 main()
