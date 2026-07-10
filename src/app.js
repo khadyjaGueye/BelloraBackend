@@ -12,6 +12,8 @@ const productRoute = require('./routes/product.route');
 const orderRoute = require('./routes/order.route');
 const authRoute = require("./routes/auth.route");
 const userRoutes = require('./routes/user.route');
+const prisma = require("./config/prisma");
+const errorHandler = require('../middleware/errorHandler.middleware');
 
 const path = require('path');
 
@@ -37,7 +39,7 @@ app.use("/api/auth", authRoute);
 
 app.use("/api/users", userRoutes);
 
-  const prisma = require("./config/prisma");
+ 
 
 app.get("/api/debug", async (req, res) => {
   try {
@@ -52,5 +54,9 @@ app.get("/api/debug", async (req, res) => {
     });
   }
 });
+
+
+// middleware global d’erreurs (toujours à la fin)
+app.use(errorHandler);
 
 module.exports = app;

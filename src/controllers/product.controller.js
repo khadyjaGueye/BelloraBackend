@@ -108,10 +108,9 @@ async function create(req, res) {
     }
 }
 
-async function update(req, res) {
+async function update(req, res, next) {
     try {
-        const oldProduct =
-            await productService.findById(req.params.id);
+        const oldProduct = await productService.findById(req.params.id);
         if (!oldProduct) {
             return res.status(404).json({
                 data: {
@@ -120,40 +119,33 @@ async function update(req, res) {
                 }
             });
         }
-        let image =
-            oldProduct.image;
+
+        let image = oldProduct.image;
         if (req.file) {
-            image =
-                await uploadProductImage(req.file);
+            image = await uploadProductImage(req.file);
         }
-        const product =
-            await productService.update(
-                req.params.id,
-                {
-                    name: req.body.name,
-                    description: req.body.description,
-                    price: req.body.price,
-                    stock: req.body.stock,
-                    categoryId: req.body.category_id,
-                    image
-                }
-            );
+
+        const product = await productService.update(req.params.id, {
+            name: req.body.name,
+            description: req.body.description,
+            price: req.body.price,
+            stock: req.body.stock,
+            category_id: req.body.category_id,
+            image
+        });
+
         res.json({
             data: {
                 success: true,
                 message: "Produit modifié",
-                product: product
+                product
             }
         });
     } catch (error) {
-        res.status(500).json({
-            data: {
-                success: false,
-                message: error.message
-            }
-        });
+        next(error); // délègue au middleware global
     }
 }
+
 
 async function remove(req, res) {
     try {
