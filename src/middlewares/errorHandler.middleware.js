@@ -12,6 +12,7 @@ async function errorHandler(err, req, res, next) {
       statusCode = 400;
     }
   }
+  
   res.status(statusCode).json({
     data: {
       success: false,
