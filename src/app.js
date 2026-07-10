@@ -13,7 +13,7 @@ const orderRoute = require('./routes/order.route');
 const authRoute = require("./routes/auth.route");
 const userRoutes = require('./routes/user.route');
 const prisma = require("./config/prisma");
-const errorHandler = require('../middleware/errorHandler.middleware');
+const errorHandler = require('../middlewares/errorHandler.middleware');
 
 const path = require('path');
 
