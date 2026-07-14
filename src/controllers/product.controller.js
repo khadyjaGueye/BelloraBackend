@@ -3,7 +3,7 @@ const supabase = require("../config/supabase");
 
 async function uploadProductImage(file) {
     const filename =
-        `products/${Date.now()}-${file.originalname}`;
+        `${Date.now()}-${file.originalname}`;
     const { error } = await supabase.storage
         .from("products")
         .upload(
