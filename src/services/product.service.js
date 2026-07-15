@@ -72,10 +72,18 @@ async function remove(id) {
   });
 }
 
+async function findByCategory(categoryId) {
+    return prisma.product.findMany({
+        where: { category_id: Number(categoryId) }
+    });
+}
+
+
 module.exports = {
   findAll,
   findById,
   create,
   update,
-  remove
+  remove,
+  findByCategory
 };
