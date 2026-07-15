@@ -43,7 +43,8 @@ exports.updateProfile = async (req, res) => {
 
     res.json({
       data: {
-        success: true, message: 'Profil mis à jour',
+        success: true, 
+        message: 'Profil mis à jour',
         user: result.user
       }
     });
@@ -56,14 +57,24 @@ exports.changePassword = async (req, res) => {
   try {
     const id = req.user.id;
     const { old_password, new_password } = req.body;
-
     const result = await userService.changePassword(id, old_password, new_password);
     if (!result.success) {
-      return res.status(400).json({ success: false, message: result.message });
+      return res.status(400).json({
+        data: {
+          success: false,
+          message: result.message
+        }
+      });
     }
-
-    res.json({ success: true, message: 'Mot de passe modifié avec succès' });
+    res.json({
+      data: {
+        success: true,
+        message: 'Mot de passe modifié avec succès'
+      }
+    });
   } catch (error) {
     next(error); // délègue au middleware global
   }
 };
+
+

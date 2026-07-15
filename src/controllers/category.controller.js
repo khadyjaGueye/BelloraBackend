@@ -54,7 +54,7 @@ async function create(req, res) {
         let image = null;
         if (req.file) {
             const fileName =
-                `categories/${Date.now()}-${req.file.originalname}`;
+                `{Date.now()}-${req.file.originalname}`;
             const { data, error } =
                 await supabase.storage
                     .from("categories")
@@ -167,12 +167,10 @@ async function update(req, res) {
     }
 }
 
-async function remove(req, res) {
+async function remove(req, res, next) {
     try {
-        const category =
-            await categoryService.findById(
-                req.params.id
-            );
+        const category = await categoryService.findById(req.params.id);
+
         if (!category) {
             return res.status(404).json({
                 data: {
@@ -181,9 +179,9 @@ async function remove(req, res) {
                 }
             });
         }
-        await categoryService.remove(
-            req.params.id
-        );
+
+        await categoryService.remove(req.params.id);
+
         return res.status(200).json({
             data: {
                 success: true,
@@ -194,6 +192,7 @@ async function remove(req, res) {
         next(error); // délègue au middleware global
     }
 }
+
 
 module.exports = {
     getAll,
