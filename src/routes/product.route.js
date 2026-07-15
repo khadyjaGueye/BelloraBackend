@@ -9,6 +9,7 @@ const roleMiddleware = require('../middlewares/role.middleware');
 router.get('/', productController.getAll);
 router.get('/:id', productController.getById);
 router.get('/:id/category', productController.getByCategory);
+router.get('/categories/last-products', productController.getLastProductsByCategories);
 
 // Création d’un produit avec image
 router.post('/', authMiddleware, roleMiddleware('admin'), upload.single('image'), productController.create);

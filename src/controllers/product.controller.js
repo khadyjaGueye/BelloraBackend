@@ -162,13 +162,50 @@ async function getByCategory(req, res, next) {
         }
         // Récupérer les produits liés à cette catégorie
         const products = await productService.findByCategory(categoryId);
-
         return res.status(200).json({
             data: {
                 success: true,
                 category: category,
                 products: products
             }
+        });
+    } catch (error) {
+        next(error);
+    }
+}
+
+async function getLastProductByCategory(req, res, next) {
+    try {
+        const categoryId = req.params.id;
+        const category = await categoryService.findById(categoryId);
+        if (!category) {
+            return res.status(404).json({
+                data: {
+                    success: false,
+                    message: "Catégorie introuvable"
+                }
+            });
+        }
+        const product = await productService.findLastProductByCategory(categoryId);
+        return res.status(200).json({
+            data: {
+                success: true,
+                category: category,
+                product: product
+            }
+        });
+    } catch (error) {
+        next(error);
+    }
+}
+
+async function getLastProductsByCategories(req, res, next) {
+    try {
+        const data = await productService.findLastProductsByAllCategories();
+
+        return res.status(200).json({
+            success: true,
+            categories: data
         });
     } catch (error) {
         next(error);
@@ -182,5 +219,7 @@ module.exports = {
     create,
     update,
     remove,
-    getByCategory
+    getByCategory,
+    getLastProductByCategory,
+    getLastProductsByCategories,
 };

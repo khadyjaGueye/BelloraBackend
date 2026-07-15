@@ -78,6 +78,25 @@ async function findByCategory(categoryId) {
     });
 }
 
+async function findLastProductsByAllCategories() {
+  const categories = await prisma.category.findMany();
+  const results = await Promise.all(
+    categories.map(async (cat) => {
+      const lastProduct = await prisma.product.findFirst({
+        where: { category_id: cat.id },
+        orderBy: { createdAt: 'desc' } // ou id: 'desc'
+      });
+      return {
+        category: cat,
+        lastProduct: lastProduct || null
+      };
+    })
+  );
+
+  return results;
+}
+
+
 
 module.exports = {
   findAll,
@@ -85,5 +104,6 @@ module.exports = {
   create,
   update,
   remove,
-  findByCategory
+  findByCategory,
+  findLastProductsByAllCategories
 };
