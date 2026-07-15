@@ -55,7 +55,7 @@ async function create(req, res) {
         let image = null;
         if (req.file) {
             const fileName =
-                `{Date.now()}-${req.file.originalname}`;
+                `${Date.now()}-${req.file.originalname}`;
             const { data, error } =
                 await supabase.storage
                     .from("categories")
