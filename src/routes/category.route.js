@@ -10,7 +10,7 @@ module.exports = router;
 router.get('/', categoryController.getAll);
 router.post("/", authMiddleware, roleMiddleware("admin"), upload.single("image"), categoryController.create);
 router.get('/:id', categoryController.getById);
-router.put('/:id', categoryController.update);
-router.delete('/:id', categoryController.remove);
+router.put('/:id',authMiddleware, roleMiddleware("admin"), categoryController.update);
+router.delete('/:id',authMiddleware, roleMiddleware("admin"), categoryController.remove);
 
 module.exports = router;
