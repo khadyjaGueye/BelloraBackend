@@ -1,4 +1,5 @@
 const categoryService = require('../services/category.service');
+const productService = require("../services/product.service");
 const supabase = require("../config/supabase");
 
 async function getAll(req, res) {
@@ -180,6 +181,19 @@ async function remove(req, res, next) {
             });
         }
 
+        // Vérifier si des produits sont liés à cette catégorie
+        const products = await productService.findByCategory(req.params.id);
+
+        if (products.length > 0) {
+            return res.status(400).json({
+                data: {
+                    success: false,
+                    message: 'Impossible de supprimer : des produits sont liés à cette catégorie.'
+                }
+            });
+        }
+
+        // Si aucun produit lié, on peut supprimer
         await categoryService.remove(req.params.id);
 
         return res.status(200).json({
