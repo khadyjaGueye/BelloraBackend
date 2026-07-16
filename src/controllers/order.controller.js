@@ -115,9 +115,48 @@ async function updateStatus(req, res) {
     }
 }
 
+async function getOrderCount(req, res) {
+    try {
+        const total = await orderService.countAllOrders();
+        return res.json({
+            data: { success: true, total }
+        });
+    } catch (error) {
+        return res.status(500).json({
+            data: { success: false, message: error.message }
+        });
+    }
+}
+
+async function getOrderCountByStatus(req, res) {
+    try {
+        const { status } = req.params;
+        const total = await orderService.countOrdersByStatus(status);
+        return res.json({
+            data: { success: true, total }
+        });
+    } catch (error) {
+        return res.status(500).json({
+            data: { success: false, message: error.message }
+        });
+    }
+}
+
+async function getClientCount(req, res) {
+  try {
+    const total = await orderService.countClients();
+    return res.json({ data: { success: true, total } });
+  } catch (error) {
+    return res.status(500).json({ data: { success: false, message: error.message } });
+  }
+}
+
 module.exports = {
     getAll,
     getOne,
     updateStatus,
-    store
+    store,
+    getOrderCount,
+    getOrderCountByStatus,
+    getClientCount,
 };

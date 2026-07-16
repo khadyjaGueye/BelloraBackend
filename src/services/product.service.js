@@ -48,6 +48,16 @@ async function create(product) {
   });
 }
 
+async function countAll() {
+  return await prisma.product.count();
+}
+
+async function countByCategory(categoryId) {
+  return await prisma.product.count({
+    where: { category_id: Number(categoryId) }
+  });
+}
+
 async function update(id, product) {
   return await prisma.product.update({
     where: {
@@ -96,8 +106,6 @@ async function findLastProductsByAllCategories() {
   return results;
 }
 
-
-
 module.exports = {
   findAll,
   findById,
@@ -105,5 +113,7 @@ module.exports = {
   update,
   remove,
   findByCategory,
-  findLastProductsByAllCategories
+  findLastProductsByAllCategories,
+  countAll,
+  countByCategory,
 };

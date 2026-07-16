@@ -43,7 +43,7 @@ exports.updateProfile = async (req, res) => {
 
     res.json({
       data: {
-        success: true, 
+        success: true,
         message: 'Profil mis à jour',
         user: result.user
       }
@@ -76,5 +76,14 @@ exports.changePassword = async (req, res) => {
     next(error); // délègue au middleware global
   }
 };
+
+exports.getUserCount = async (req, res) => {
+  try {
+    const total = await userService.countUsers();
+    return res.json({ data: { success: true, total } });
+  } catch (error) {
+    return res.status(500).json({ data: { success: false, message: error.message } });
+  }
+}
 
 

@@ -11,9 +11,11 @@ router.get('/:id', productController.getById);
 router.get('/:id/category', productController.getByCategory);
 router.get('/categories/last-products', productController.getLastProductsByCategories);
 
+router.get('/products/count', authMiddleware, roleMiddleware('admin'), productController.getCount);
+router.get('/products/count/:categoryId', authMiddleware, roleMiddleware('admin'), productController.getCountByCategory)
+
 // Création d’un produit avec image
 router.post('/', authMiddleware, roleMiddleware('admin'), upload.single('image'), productController.create);
-
 // Upload d’une image seule
 // router.post('/upload', authMiddleware, roleMiddleware('admin'), upload.single('image'), productController.uploadImage);
 

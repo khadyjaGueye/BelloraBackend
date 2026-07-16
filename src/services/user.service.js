@@ -57,4 +57,10 @@ async function changePassword(id, oldPassword, newPassword) {
   return { success: true };
 }
 
-module.exports = { getUserById, updateProfile, changePassword };
+// Compter tous les utilisateurs
+async function countUsers() {
+  return await prisma.user.count();
+}
+
+
+module.exports = { getUserById, updateProfile, changePassword ,countUsers};

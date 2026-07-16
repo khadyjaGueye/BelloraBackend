@@ -128,11 +128,32 @@ async function validateOrder(orderId, status) {
     return !!updated;
 }
 
+// Compter toutes les commandes
+async function countAllOrders() {
+    return await prisma.order.count();
+}
+
+// Compter par statut
+async function countOrdersByStatus(status) {
+    return await prisma.order.count({
+        where: { status }
+    });
+}
+
+// Compter tous les clients distincts (via customer_phone)
+async function countClients() {
+  return await prisma.order.count(); // grâce au @unique, chaque phone est unique
+}
+
+
 module.exports = {
     getOrderById,
     createOrder,
     createOrderItems,
     getAllOrders,
     updateOrderStatus,
-    validateOrder
+    validateOrder,
+    countAllOrders,
+    countOrdersByStatus,
+    countClients
 };
