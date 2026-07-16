@@ -145,6 +145,11 @@ async function countClients() {
   return await prisma.order.count(); // grâce au @unique, chaque phone est unique
 }
 
+async function debugOrders() {
+  const orders = await prisma.order.findMany();
+  console.log("Orders:", orders);
+}
+
 
 module.exports = {
     getOrderById,
@@ -155,5 +160,6 @@ module.exports = {
     validateOrder,
     countAllOrders,
     countOrdersByStatus,
-    countClients
+    countClients,
+    debugOrders
 };
