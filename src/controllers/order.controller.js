@@ -67,24 +67,24 @@ async function getAll(req, res) {
 }
 
 async function getOne(req, res) {
-  try {
-    const { id } = req.params;
-    const order = await orderService.getOrderById(id);
+    try {
+        const { id } = req.params;
+        const order = await orderService.getOrderById(id);
 
-    if (!order) {
-      return res.status(404).json({
-        data: { success: false, message: 'Commande introuvable' }
-      });
+        if (!order) {
+            return res.status(404).json({
+                data: { success: false, message: 'Commande introuvable' }
+            });
+        }
+
+        return res.json({
+            data: { success: true, order }
+        });
+    } catch (error) {
+        return res.status(500).json({
+            data: { success: false, message: error.message }
+        });
     }
-
-    return res.json({
-      data: { success: true, order }
-    });
-  } catch (error) {
-    return res.status(500).json({
-      data: { success: false, message: error.message }
-    });
-  }
 }
 
 async function updateStatus(req, res) {
@@ -96,7 +96,7 @@ async function updateStatus(req, res) {
         if (status === 'confirmee' || status === 'livree') {
             updated = await orderService.validateOrder(id, status);
         } else {
-            updated = await orderService.updateOrderStatus(status, id);
+            updated = await orderService.updateOrderStatus(id, status);
         }
 
         if (!updated) {
