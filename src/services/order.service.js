@@ -150,6 +150,39 @@ async function debugOrders() {
   console.log("Orders:", orders);
 }
 
+async function findAllOrdersWithProducts() {
+    return await prisma.order.findMany({
+        include: {
+            items: {
+                include: {
+                    product: {
+                        select: {
+                            id: true,
+                            name: true,
+                            price: true,
+                            image: true,
+                            category: {
+                                select: { name: true }
+                            }
+                        }
+                    }
+                }
+            },
+            user: {
+                select: {
+                    id: true,
+                    first_name: true,
+                    last_name: true,
+                    email: true
+                }
+            }
+        },
+        orderBy: {
+            created_at: "desc"
+        }
+    });
+}
+
 
 module.exports = {
     getOrderById,
@@ -161,5 +194,6 @@ module.exports = {
     countAllOrders,
     countOrdersByStatus,
     countClients,
-    debugOrders
+    debugOrders,
+    findAllOrdersWithProducts
 };

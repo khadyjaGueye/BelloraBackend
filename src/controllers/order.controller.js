@@ -143,11 +143,25 @@ async function getOrderCountByStatus(req, res) {
 }
 
 async function getClientCount(req, res) {
+    try {
+        const total = await orderService.countClients();
+        return res.json({ data: { success: true, total } });
+    } catch (error) {
+        return res.status(500).json({ data: { success: false, message: error.message } });
+    }
+}
+
+async function getAllOrdersWithProducts(req, res, next) {
   try {
-    const total = await orderService.countClients();
-    return res.json({ data: { success: true, total } });
+    const orders = await orderService.findAllOrdersWithProducts();
+    return res.json({
+      data: {
+        success: true,
+        orders
+      }
+    });
   } catch (error) {
-    return res.status(500).json({ data: { success: false, message: error.message } });
+    next(error);
   }
 }
 
@@ -159,4 +173,6 @@ module.exports = {
     getOrderCount,
     getOrderCountByStatus,
     getClientCount,
+    getAllOrdersWithProducts
+   
 };
