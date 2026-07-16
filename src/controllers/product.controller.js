@@ -38,25 +38,33 @@ async function getAll(req, res,next) {
     }
 }
 
-async function getById(req, res,next) {
-    try {
-        const product =
-            await productService.findById(req.params.id);
-        if (!product) {
-            return res.status(404).json({
-                success: false,
-                message: "Produit introuvable"
-            });
-        }
-        res.json({
-            data: {
-                success: true,
-                product: product,
-            }
-        });
-    } catch (error) {
-        next(error); // délègue au middleware global
+async function getById(req, res, next) {
+  try {
+    const id = Number(req.params.id);
+    if (!id || isNaN(id)) {
+      return res.status(400).json({
+        success: false,
+        message: "ID invalide"
+      });
     }
+
+    const product = await productService.findById(id);
+    if (!product) {
+      return res.status(404).json({
+        success: false,
+        message: "Produit introuvable"
+      });
+    }
+
+    return res.json({
+      data: {
+        success: true,
+        product
+      }
+    });
+  } catch (error) {
+    next(error);
+  }
 }
 
 async function create(req, res,next) {

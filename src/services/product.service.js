@@ -17,15 +17,16 @@ async function findAll() {
 }
 
 async function findById(id) {
+  // Vérification côté service pour éviter NaN
+  const productId = Number(id);
+  if (!productId || isNaN(productId)) {
+    throw new Error("ID invalide");
+  }
   return await prisma.product.findUnique({
-    where: {
-      id: Number(id)
-    },
+    where: { id: productId },
     include: {
       category: {
-        select: {
-          name: true
-        }
+        select: { name: true }
       }
     }
   });
@@ -83,9 +84,9 @@ async function remove(id) {
 }
 
 async function findByCategory(categoryId) {
-    return prisma.product.findMany({
-        where: { category_id: Number(categoryId) }
-    });
+  return prisma.product.findMany({
+    where: { category_id: Number(categoryId) }
+  });
 }
 
 async function findLastProductsByAllCategories() {
