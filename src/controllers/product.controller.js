@@ -47,7 +47,6 @@ async function getById(req, res, next) {
         message: "ID invalide"
       });
     }
-
     const product = await productService.findById(id);
     if (!product) {
       return res.status(404).json({
