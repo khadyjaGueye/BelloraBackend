@@ -23,7 +23,7 @@ async function uploadProductImage(file) {
     return data.publicUrl;
 }
 
-async function getAll(req, res) {
+async function getAll(req, res,next) {
     try {
         const products =
             await productService.findAll();
@@ -38,7 +38,7 @@ async function getAll(req, res) {
     }
 }
 
-async function getById(req, res) {
+async function getById(req, res,next) {
     try {
         const product =
             await productService.findById(req.params.id);
@@ -59,7 +59,7 @@ async function getById(req, res) {
     }
 }
 
-async function create(req, res) {
+async function create(req, res,next) {
     try {
         console.log(req.body);
         let image = null;
@@ -133,7 +133,7 @@ async function update(req, res, next) {
 }
 
 
-async function remove(req, res) {
+async function remove(req, res,next) {
     try {
         await productService.remove(req.params.id);
         res.json({
@@ -212,31 +212,27 @@ async function getLastProductsByCategories(req, res, next) {
     }
 }
 
-async function getCount(req, res) {
-  try {
-    const total = await productService.countAll();
-    return res.json({
-      data: { success: true, total }
-    });
-  } catch (error) {
-    return res.status(500).json({
-      data: { success: false, message: error.message }
-    });
-  }
+async function getCount(req, res,next) {
+    try {
+        const total = await productService.countAll();
+        return res.json({
+            data: { success: true, total }
+        });
+    } catch (error) {
+        next(error);
+    }
 }
 
-async function getCountByCategory(req, res) {
-  try {
-    const { categoryId } = req.params;
-    const total = await productService.countByCategory(categoryId);
-    return res.json({
-      data: { success: true, total }
-    });
-  } catch (error) {
-    return res.status(500).json({
-      data: { success: false, message: error.message }
-    });
-  }
+async function getCountByCategory(req, res,next) {
+    try {
+        const { categoryId } = req.params;
+        const total = await productService.countByCategory(categoryId);
+        return res.json({
+            data: { success: true, total }
+        });
+    } catch (error) {
+        next(error);
+    }
 }
 
 module.exports = {
@@ -248,6 +244,6 @@ module.exports = {
     getByCategory,
     getLastProductByCategory,
     getLastProductsByCategories,
-      getCount,
-  getCountByCategory,
+    getCount,
+    getCountByCategory,
 };
