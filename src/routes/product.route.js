@@ -7,11 +7,12 @@ const roleMiddleware = require('../middlewares/role.middleware');
 
 // Liste des produits
 router.get('/', productController.getAll);
-router.get('/count', authMiddleware, roleMiddleware('admin'), productController.getCount);
+
 router.get('/categories/last-products', productController.getLastProductsByCategories);
 router.get('/:id', productController.getById);
+router.get('/count', authMiddleware, roleMiddleware('admin'), productController.getCount);
 router.get('/:id/category', productController.getByCategory);
-router.get('/count/:categoryId', authMiddleware, roleMiddleware('admin'), productController.getCountByCategory)
+router.get('/count/:categoryId', authMiddleware, roleMiddleware('admin'), productController.getCountByCategory);
 
 // Création d’un produit avec image
 router.post('/', authMiddleware, roleMiddleware('admin'), upload.single('image'), productController.create);
