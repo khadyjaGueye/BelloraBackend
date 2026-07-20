@@ -15,7 +15,7 @@ router.get('/count', authMiddleware, roleMiddleware('admin'), orderController.ge
 router.get('/count/clients',authMiddleware, roleMiddleware('admin'), orderController.getClientCount);
 
 // Liste des commandes avec leurs produits
-router.get("/with-products", orderController.getAllOrdersWithProducts);
+router.get("/with-products", authMiddleware, roleMiddleware('admin'), orderController.getAllOrdersWithProducts);
 router.get('/:id', authMiddleware, roleMiddleware('admin'), orderController.getOne);
 // Mettre à jour le statut d’une commande (admin uniquement)
 router.put('/:id/', authMiddleware, roleMiddleware('admin'), orderController.updateStatus);
